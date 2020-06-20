@@ -20,6 +20,7 @@ long testMotorTime = millis();
 #define POINT_TURN_LEFT 3
 #define POINT_TURN_RIGHT 4
 #define STOP 5
+#define NOSIGNAL 0
 
 #define INIT_SPEED 20
 #define MAX_SPEED 40
@@ -235,12 +236,31 @@ void moveRobot_Joystick() {
 void moveRobot_Serial() {
   if(Serial.available()) {
     serialBuf = Serial.read();
-    if(serialBuf == '1')
-      set_flag = 1;
+    switch(serialBuf) {
+      case '1':
+        nowDirection = FORWARD;
+        Serial.println("move forward");
+        break;
+      case '2':
+        nowDirection = BACKWARD;
+        break;
+      case '3':
+        nowDirection = POINT_TURN_LEFT;
+        break;
+      case '4':
+        nowDirection = POINT_TURN_RIGHT;
+        break;
+      case '5':
+        nowDirection = STOP;
+        Serial.println("stop");
+        break;
+      default:
+        break;
+    }
     serialBuf ='\0';
   }
 
-  if (joy_Y >= 80 && joy_X <= 20 && joy_X >= -20) // forward
+  if (nowDirection == FORWARD) // forward
   {
     if(prevDirection == FORWARD) {
       if(testMotorTime + 200 < millis() && speed1 <= MAX_SPEED) {
@@ -259,7 +279,7 @@ void moveRobot_Serial() {
     analogWrite(m2_VR, speed1);
     prevDirection = FORWARD;
   }
-  else if (joy_Y <= -80 && joy_X <= 20 && joy_X >= -20) // backward
+  else if (nowDirection == BACKWARD) // backward
   {
     if(prevDirection == BACKWARD) {
       if(testMotorTime + 200 < millis() && speed1 <= MAX_SPEED) {
@@ -278,7 +298,7 @@ void moveRobot_Serial() {
     analogWrite(m2_VR, speed1);
     prevDirection = BACKWARD;
   }
-  else if (joy_X >= 80 && joy_Y <= 20 && joy_Y >= -20) // point turn right
+  else if (nowDirection == POINT_TURN_RIGHT) // point turn right
   {
     if(prevDirection == POINT_TURN_RIGHT) {
       if(testMotorTime + 200 < millis() && speed1 <= MAX_SPEED) {
@@ -297,7 +317,7 @@ void moveRobot_Serial() {
     analogWrite(m2_VR, speed1);
     prevDirection = POINT_TURN_RIGHT;
   }
-  else if (joy_X <= -80 && joy_Y <= 20 && joy_Y >= -20) // point turn left
+  else if (nowDirection == POINT_TURN_LEFT) // point turn left
   {
     if(prevDirection == POINT_TURN_LEFT) {
       if(testMotorTime + 200 < millis() && speed1 <= MAX_SPEED) {
@@ -327,7 +347,7 @@ void moveRobot_Serial() {
 void loop() {
   // put your main code here, to run repeatedly:
 
-  moveRobot_Serial();
+  moveRobot_Joystick();
 
  
 
