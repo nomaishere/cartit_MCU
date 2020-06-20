@@ -24,13 +24,19 @@ long testMotorTime = millis();
 #define INIT_SPEED 20
 #define MAX_SPEED 40
 
+#define JOYSTICK_MODE 1
+#define SERIAL_MODE 2
 
 //#######################################
 int pos=0;int steps=0;int speed1=0;
 String direction1;
 int prevDirection = STOP;
+int nowDirection = STOP;
 int d_state_1 = 1;
 int d_state_2 = 1;
+
+char serialBuf;
+int set_flag;
 //#######################################
 //#######################################
 void plus() {
@@ -91,7 +97,7 @@ void printLog(int joy_X, int joy_Y) {
     Serial.print("joy_Y : ");
     Serial.println(joy_Y);
     */
-    //Serial.println(prevDirection);
+    Serial.println(prevDirection);
   }
 }
 
@@ -99,7 +105,7 @@ int adjustJoystickValue(int value) {
 }
 
 void setup(){
-    //Serial.begin(115200); //USB Serial initialize
+    Serial.begin(115200); //USB Serial initialize
 
     //wheel 1 - Setup pin mode
     pinMode(m1_EL_Start_Stop, OUTPUT);//stop/start - EL 
@@ -121,9 +127,7 @@ void setup(){
 
 }
 
-
-void loop() {
-  // put your main code here, to run repeatedly:
+void moveRobot_Joystick() {
   int joy_X = map(analogRead(A0),0, 1023, 100, -100); // reverse x 
   int joy_Y = map(analogRead(A1),0, 1023, -100, 100);
   printLog(joy_X, joy_Y);
@@ -226,5 +230,105 @@ void loop() {
     wheelStop();
     prevDirection = STOP;
   }
+}
+
+void moveRobot_Serial() {
+  if(Serial.available()) {
+    serialBuf = Serial.read();
+    if(serialBuf == '1')
+      set_flag = 1;
+    serialBuf ='\0';
+  }
+
+  if (joy_Y >= 80 && joy_X <= 20 && joy_X >= -20) // forward
+  {
+    if(prevDirection == FORWARD) {
+      if(testMotorTime + 200 < millis() && speed1 <= MAX_SPEED) {
+        testMotorTime = millis();
+        speed1++;
+      }
+    }
+    else {
+      speed1 = INIT_SPEED;
+    }
+    Left_Forward();
+    Right_Forward();
+    digitalWrite(m1_EL_Start_Stop,LOW);
+    digitalWrite(m2_EL_Start_Stop,LOW);
+    analogWrite(m1_VR, speed1);
+    analogWrite(m2_VR, speed1);
+    prevDirection = FORWARD;
+  }
+  else if (joy_Y <= -80 && joy_X <= 20 && joy_X >= -20) // backward
+  {
+    if(prevDirection == BACKWARD) {
+      if(testMotorTime + 200 < millis() && speed1 <= MAX_SPEED) {
+        testMotorTime = millis();
+        speed1++;
+      }
+    }
+    else {
+      speed1 = INIT_SPEED;
+    }
+    Left_Backward();
+    Right_Backward();
+    digitalWrite(m1_EL_Start_Stop,LOW);
+    digitalWrite(m2_EL_Start_Stop,LOW);
+    analogWrite(m1_VR, speed1);
+    analogWrite(m2_VR, speed1);
+    prevDirection = BACKWARD;
+  }
+  else if (joy_X >= 80 && joy_Y <= 20 && joy_Y >= -20) // point turn right
+  {
+    if(prevDirection == POINT_TURN_RIGHT) {
+      if(testMotorTime + 200 < millis() && speed1 <= MAX_SPEED) {
+        testMotorTime = millis();
+        speed1++;
+      }
+    }
+    else {
+      speed1 = INIT_SPEED;
+    }
+    Left_Forward();
+    Right_Backward();
+    digitalWrite(m1_EL_Start_Stop,LOW);
+    digitalWrite(m2_EL_Start_Stop,LOW);
+    analogWrite(m1_VR, speed1);
+    analogWrite(m2_VR, speed1);
+    prevDirection = POINT_TURN_RIGHT;
+  }
+  else if (joy_X <= -80 && joy_Y <= 20 && joy_Y >= -20) // point turn left
+  {
+    if(prevDirection == POINT_TURN_LEFT) {
+      if(testMotorTime + 200 < millis() && speed1 <= MAX_SPEED) {
+        testMotorTime = millis();
+        speed1++;
+      }
+    }
+    else {
+      speed1 = INIT_SPEED;
+    }
+    Left_Backward();
+    Right_Forward();
+    digitalWrite(m1_EL_Start_Stop,LOW);
+    digitalWrite(m2_EL_Start_Stop,LOW);
+    analogWrite(m1_VR, speed1);
+    analogWrite(m2_VR, speed1);
+    prevDirection = POINT_TURN_LEFT;
+  }
+  else
+  {
+    //stop
+    wheelStop();
+    prevDirection = STOP;
+  }
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+
+  moveRobot_Serial();
+
+ 
 
 }
