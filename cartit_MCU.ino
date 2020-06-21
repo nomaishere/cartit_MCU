@@ -1,14 +1,14 @@
 // GPIO mappings for Arduino Mega 2560
 //#######################################
-int m1_VR=2;    //VR 
-int m1_Signal_hall=4;   // Signal - Hall sensor
-int m1_ZF_Direction=3;  // ZF 
-int m1_EL_Start_Stop=5;  //EL 
+int m1_VR=3;    //VR 
+int m1_Signal_hall=5;   // Signal - Hall sensor
+int m1_ZF_Direction=4;  // ZF 
+int m1_EL_Start_Stop=6;  //EL 
 
-int m2_VR=8;    //VR
-int m2_Signal_hall=10;   // Signal - Hall sensor
-int m2_ZF_Direction=9;  // ZF 
-int m2_EL_Start_Stop=11;  //EL 
+int m2_VR=9;    //VR
+int m2_Signal_hall=11;   // Signal - Hall sensor
+int m2_ZF_Direction=10;  // ZF 
+int m2_EL_Start_Stop=12;  //EL 
 
 long nowTime = millis();
 long testMotorTime = millis();
@@ -243,12 +243,15 @@ void moveRobot_Serial() {
         break;
       case '2':
         nowDirection = BACKWARD;
+        Serial.println("move backward");
         break;
       case '3':
         nowDirection = POINT_TURN_LEFT;
+        Serial.println("point turn left");
         break;
       case '4':
         nowDirection = POINT_TURN_RIGHT;
+        Serial.println("point turn right");
         break;
       case '5':
         nowDirection = STOP;
@@ -347,7 +350,7 @@ void moveRobot_Serial() {
 void loop() {
   // put your main code here, to run repeatedly:
 
-  moveRobot_Joystick();
+  moveRobot_Serial();
 
  
 
